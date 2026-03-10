@@ -1,0 +1,13 @@
+/* HyDE-compatible color variable mapping
+ * Maps Catppuccin Mocha palette to HyDE's expected variable names.
+ * All ported HyDE styles reference these variables. */
+* {
+    main-bg:            #1E1E2Ee6;
+    main-fg:            #CDD6F4ff;
+    main-br:            #CBA6F7ff;
+    main-ex:            #F5E0DCff;
+    select-bg:          #B4BEFEff;
+    select-fg:          #1E1E2Bff;
+    separatorcolor:     transparent;
+    border-color:       transparent;
+}
