@@ -29,7 +29,7 @@
 #   4. A second rofi menu presents the action (VS Code / Terminal / File Manager).
 #
 
-THEME="$HOME/.config/rofi/themes/projects.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 PROJECTS_DIR="$HOME/work"
 
 # Ensure the projects directory exists (first-run convenience)

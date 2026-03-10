@@ -26,7 +26,7 @@
 #   ~/.config/rofi/scripts/rofi-obsidian.sh
 #
 
-THEME="$HOME/.config/rofi/themes/obsidian.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 VAULT_DIR="$HOME/powerhouse"
 SCRIPT_DIR="$HOME/.config/rofi/scripts"
 

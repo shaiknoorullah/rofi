@@ -24,7 +24,7 @@
 #   ~/.config/rofi/scripts/rofi-display.sh
 #
 
-THEME="$HOME/.config/rofi/themes/display.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 
 # get_outputs()
 #   Queries xrandr for all physically connected outputs.

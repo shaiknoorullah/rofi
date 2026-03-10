@@ -28,7 +28,7 @@
 #   it's just i3 boilerplate and adds visual noise to the listing.
 
 # Path to the dedicated rofi theme for the keybindings viewer
-THEME="$HOME/.config/rofi/themes/keybindings.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # Path to the i3 window manager config file
 I3_CONFIG="$HOME/.config/i3/config"

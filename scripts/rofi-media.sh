@@ -25,7 +25,7 @@
 #   player is running — it just shows "Unknown - No Track".
 
 # Path to the dedicated rofi theme for the media controls menu
-THEME="$HOME/.config/rofi/themes/media.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # get_track_info — Retrieves the currently playing track's artist and title.
 #

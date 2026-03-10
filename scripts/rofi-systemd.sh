@@ -30,7 +30,7 @@
 #     password prompt.
 #
 
-THEME="$HOME/.config/rofi/themes/systemd.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 
 # list_services()
 #   Queries systemd for all loaded service units and formats each one as a

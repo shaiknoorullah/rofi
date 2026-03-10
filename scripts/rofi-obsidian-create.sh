@@ -24,7 +24,7 @@
 #   (Typically invoked from rofi-obsidian.sh "Create New Note" action)
 #
 
-THEME="$HOME/.config/rofi/themes/obsidian.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 VAULT_DIR="$HOME/powerhouse"
 
 # Guard: vault directory must exist

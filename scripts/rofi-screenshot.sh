@@ -25,7 +25,7 @@
 #   filename (screenshot-YYYYMMDD-HHMMSS.png).
 
 # Path to the dedicated rofi theme for the screenshot menu
-THEME="$HOME/.config/rofi/themes/screenshot.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # Directory where screenshots are persisted on disk
 SAVE_DIR="$HOME/Pictures/Screenshots"

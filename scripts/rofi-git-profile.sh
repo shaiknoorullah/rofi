@@ -28,7 +28,7 @@
 #   Empty lines are also skipped.
 
 # Path to the dedicated rofi theme for the git profile picker
-THEME="$HOME/.config/rofi/themes/git-profile.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 
 # Path to the profiles config file. Lives alongside this script so all
 # rofi script data is co-located in ~/.config/rofi/scripts/.

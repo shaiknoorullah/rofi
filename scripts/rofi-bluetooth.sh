@@ -26,7 +26,7 @@
 #   Helper functions: power_on, get_paired_devices, get_device_mac, is_connected
 #
 
-THEME="$HOME/.config/rofi/themes/bluetooth.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 
 # power_on()
 #   Ensures the Bluetooth adapter is powered on before any operation.

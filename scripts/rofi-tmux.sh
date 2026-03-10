@@ -30,7 +30,7 @@
 #      c. Existing     -> attach or switch to that session.
 #
 
-THEME="$HOME/.config/rofi/themes/tmux.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 
 # get_sessions()
 #   Builds the list of items to display in the rofi menu.

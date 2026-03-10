@@ -38,7 +38,7 @@
 #   ~/.config/rofi/scripts/rofi-websearch.sh
 #
 
-THEME="$HOME/.config/rofi/themes/websearch.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 API_DIR="$HOME/.config/rofi/scripts/apis"
 
 # Detect whether rofi was built with the "blocks" plugin by inspecting

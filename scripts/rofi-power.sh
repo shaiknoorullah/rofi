@@ -24,7 +24,7 @@
 #   centered grid of icon-only buttons rather than a full-width list.
 
 # Path to the dedicated rofi theme for the power menu
-THEME="$HOME/.config/rofi/themes/power.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # --------------------------------------------------------------------------
 # Menu options — each variable holds a single Nerd Font icon.

@@ -23,7 +23,7 @@
 #   (Also launched from rofi-obsidian.sh "Search Notes" action)
 #
 
-THEME="$HOME/.config/rofi/themes/obsidian-search.rasi"
+THEME="$HOME/.config/rofi/themes/simple.rasi"
 VAULT_DIR="$HOME/powerhouse"
 
 # Guard: ensure the vault directory exists before attempting to search

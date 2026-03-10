@@ -30,7 +30,7 @@
 #     moz_places (URLs). They are joined via moz_bookmarks.fk -> moz_places.id.
 #
 
-THEME="$HOME/.config/rofi/themes/bookmarks.rasi"
+THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # find_firefox_db()
 #   Locates the places.sqlite file inside the active Firefox profile.
