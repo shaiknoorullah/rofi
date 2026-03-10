@@ -1,39 +1,33 @@
 # Rofi Mega-Setup
 
-Rofi configured as a unified command center with 20+ functions. Fullscreen blurred overlay with solid opaque content box, Catppuccin Mocha theme, designed to replicate a Hyprland-like experience on i3.
+Rofi configured as a unified command center with 20+ functions. HyDE-inspired windowed launcher styles with Catppuccin Mocha theme, designed for i3/X11.
 
 ## Architecture
 
-### The Blur Trick
+### HyDE Theme System
 
-The fullscreen overlay effect works through a collaboration between Rofi and picom:
+The theme system is ported from [HyDE](https://github.com/HyDE-Project/HyDE), adapted for i3/X11:
 
-- Rofi window is set to `fullscreen: true` with `transparency: "real"`
-- Window background uses `cm-base-overlay` (`#1E1E2E95`) - semi-transparent
-- This triggers picom's `dual_kawase` blur on the desktop behind
-- Content boxes (inputbar, listview, mode-switcher) use SOLID opaque backgrounds
-- Result: blurred desktop with crisp, readable content on top
-- picom.conf has `"100:class_g = 'Rofi'"` in `opacity-rule` to prevent double-opacity
+- **12 windowed launcher styles** — each a self-contained `.rasi` file with unique layouts (sidebar, split-panel, grid, etc.)
+- **Launchpad** — fullscreen macOS-style 7x5 icon grid
+- **Style selector** — visual grid for switching styles, saved to `style.conf`
+- **Dynamic wallpaper injection** — launcher reads current wallpaper from `~/.fehbg` and injects it at runtime
+- **Runtime overrides** — border radius (from picom), font, and icon theme applied via `-theme-str`
 
-### Theme Layering System
+### Theme Layering
 
 ```
-catppuccin-mocha.rasi   <- Color palette (all cm-* variables)
-        |
-   settings.rasi        <- Font, global resets
-        |
-+-- list-menu.rasi      <- Base layout for searchable menus
-|   +-- launcher.rasi   <- Per-menu overrides (columns, lines, prompt icon, etc.)
-|   +-- clipboard.rasi
-|   +-- ... (16 total)
-|
-+-- option-menu.rasi    <- Base layout for horizontal icon menus
-    +-- power.rasi
-    +-- screenshot.rasi
-    +-- media.rasi
+theme.rasi                  <- HyDE-compatible color mapping (Catppuccin Mocha → HyDE vars)
+    |
++-- style_{1..12}.rasi      <- 12 launcher styles (self-contained, import theme.rasi)
++-- launchpad.rasi           <- Fullscreen app grid
++-- selector.rasi            <- Style selector preview grid
++-- clipboard.rasi           <- Dropdown utility menu (search + scrollable list)
++-- simple.rasi              <- Single-column utility menu
++-- wallpaper-slider.rasi    <- Horizontal wallpaper browser
 ```
 
-Each menu is invoked with `-theme path/to/menu.rasi`, so the global `config.rasi` contains NO theme.
+`catppuccin-mocha.rasi` (in `shared/`) contains the full Catppuccin Mocha palette for reference.
 
 ## Directory Structure
 
@@ -41,38 +35,30 @@ Each menu is invoked with `-theme path/to/menu.rasi`, so the global `config.rasi
 ~/.config/rofi/
 ├── README.md                    <- This file
 ├── config.rasi                  <- Global config (modi, matching, icons - NO theme)
+├── style.conf                   <- Saved launcher style preference
 ├── themes/
 │   ├── shared/
-│   │   ├── catppuccin-mocha.rasi  <- Full Catppuccin Mocha palette
-│   │   ├── settings.rasi          <- Font & global resets
-│   │   ├── list-menu.rasi         <- Base: searchable list menus
-│   │   └── option-menu.rasi       <- Base: horizontal icon menus
-│   ├── launcher.rasi              <- App launcher / run / window / ssh / files
-│   ├── power.rasi                 <- Power menu (5 icons)
-│   ├── screenshot.rasi            <- Screenshot mode selector (3 icons)
-│   ├── media.rasi                 <- Media controls (5 icons)
-│   ├── clipboard.rasi             <- Clipboard history
-│   ├── bluetooth.rasi             <- Bluetooth manager
-│   ├── display.rasi               <- Display/monitor layout
-│   ├── wallpaper.rasi             <- Wallpaper picker
-│   ├── systemd.rasi               <- Systemd service browser
-│   ├── calculator.rasi            <- Calculator (rofi-calc)
-│   ├── emoji.rasi                 <- Emoji picker (rofimoji)
-│   ├── websearch.rasi             <- Web search
-│   ├── projects.rasi              <- Project launcher
-│   ├── git-profile.rasi           <- Git identity switcher
-│   ├── tmux.rasi                  <- Tmux session manager
-│   ├── bookmarks.rasi             <- Firefox bookmarks
-│   ├── obsidian.rasi              <- Obsidian quick actions
-│   ├── obsidian-search.rasi       <- Obsidian note search
-│   └── keybindings.rasi           <- i3 keybinding viewer
+│   │   └── catppuccin-mocha.rasi  <- Full Catppuccin Mocha palette (reference)
+│   ├── theme.rasi                 <- HyDE color variable mapping
+│   ├── style_{1..12}.rasi         <- 12 launcher styles
+│   ├── launchpad.rasi             <- Fullscreen app grid
+│   ├── selector.rasi              <- Style selector grid
+│   ├── clipboard.rasi             <- Dropdown utility menu
+│   ├── simple.rasi                <- Single-column utility menu
+│   ├── wallpaper-slider.rasi      <- Horizontal wallpaper browser
+│   └── assets/                    <- Style preview images (for selector)
 ├── scripts/
-│   ├── rofi-power.sh              <- Power menu script
-│   ├── rofi-media.sh              <- Media controls script
-│   ├── rofi-screenshot.sh         <- Screenshot script
-│   ├── rofi-keybindings.sh        <- i3 keybinding parser
-│   ├── rofi-wallpaper.sh          <- Wallpaper selector
-│   ├── rofi-clipboard.sh         <- Clipboard (greenclip wrapper)
+│   ├── rofilaunch.sh              <- Main launcher (reads style.conf + wallpaper)
+│   ├── rofi-style-selector.sh     <- Visual style switcher
+│   ├── rofi-wallpaper.sh          <- Wallpaper browser (category grid)
+│   ├── rofi-wallpaper-slider.sh   <- Wallpaper slider (rofi-blocks + live preview)
+│   ├── generate-previews.sh       <- Screenshot each style for selector assets
+│   ├── rofi-power.sh              <- Power menu
+│   ├── rofi-media.sh              <- Media controls
+│   ├── rofi-screenshot.sh         <- Screenshot tool
+│   ├── rofi-keybindings.sh        <- i3 keybinding viewer
+│   ├── rofi-wallpaper.sh          <- Wallpaper category selector
+│   ├── rofi-clipboard.sh          <- Clipboard (greenclip wrapper)
 │   ├── rofi-git-profile.sh        <- Git profile switcher
 │   ├── rofi-tmux.sh               <- Tmux session manager
 │   ├── rofi-projects.sh           <- Project launcher
@@ -92,21 +78,39 @@ Each menu is invoked with `-theme path/to/menu.rasi`, so the global `config.rasi
 │       └── wikipedia-suggest.sh   <- Wikipedia OpenSearch API
 ```
 
+## Launcher Styles
+
+| Style | Layout | Size |
+|-------|--------|------|
+| style_1 | Sideview — wallpaper sidebar left, list right | 63x33em |
+| style_2 | TwinPanel — wallpaper header, 2-col list | 56x35em |
+| style_3 | ModeSidebar — blurred bg, mode icons + list | 37x30em |
+| style_4 | TopPanel — wallpaper left, modes center, list right | 46x30em |
+| style_5 | ModeGrid — 5-column icon grid + mode buttons | 50x31em |
+| style_6 | SimpleStack — mode icons left, text list right | 37x31em |
+| style_7 | ModeBar — compact horizontal bar | 38x12em |
+| style_8 | SplitPanel — list+modes left, wallpaper right | 37x30em |
+| style_9 | CenterStack — square wallpaper left, list right | 57x30em |
+| style_10 | CompactPanel — narrow vertical, wallpaper header | 25x40em |
+| style_11 | DiagonalSplit — quad wallpaper left, list right | 58x30em |
+| style_12 | GradientView — list left, gradient wallpaper right | 60x30em |
+| launchpad | Fullscreen 7x5 icon grid | fullscreen |
+
 ## Keybinding Reference
 
 | Keybinding | Menu | Type | Script/Command |
 |---|---|---|---|
-| `$mod+d` | App Launcher (drun) | Core | `rofi -show drun` |
-| `$mod+Shift+d` | Run Command | Core | `rofi -show run` |
-| `$mod+Tab` | Window Switcher | Core | `rofi -show window` |
-| `$mod+Shift+s` | SSH | Core | `rofi -show ssh` |
-| `$mod+Shift+f` | File Browser | Core | `rofi -show filebrowser` |
+| `$mod+Space` | App Launcher | Core | `rofilaunch.sh d` |
+| `$mod+Tab` | Window Switcher | Core | `rofilaunch.sh w` |
+| `$mod+Shift+s` | Run Command | Core | `rofilaunch.sh --run` |
+| `$mod+Shift+f` | File Browser | Core | `rofilaunch.sh f` |
+| `$mod+Shift+d` | Style Selector | Core | `rofi-style-selector.sh` |
 | `$mod+F1` | Rofi Keys | Core | `rofi -show keys` |
 | `$mod+Shift+e` | Power Menu | System | `rofi-power.sh` |
 | `$mod+c` | Clipboard | System | `rofi-clipboard.sh` |
 | `$mod+Shift+b` | Bluetooth | System | `rofi-bluetooth.sh` |
 | `$mod+Shift+m` | Display Manager | System | `rofi-display.sh` |
-| `$mod+Shift+w` | Wallpaper Picker | System | `rofi-wallpaper.sh` |
+| `$mod+Shift+w` | Wallpaper Browser | System | `rofi-wallpaper.sh` |
 | `Print` | Screenshot | System | `rofi-screenshot.sh` |
 | `$mod+Shift+p` | Systemd Services | System | `rofi-systemd.sh` |
 | `$mod+equal` | Calculator | Productivity | `rofi -show calc` |
@@ -121,13 +125,22 @@ Each menu is invoked with `-theme path/to/menu.rasi`, so the global `config.rasi
 | `$mod+F2` | i3 Keybindings | Other | `rofi-keybindings.sh` |
 | `$mod+m` | Media Controls | Other | `rofi-media.sh` |
 
+## Theme Assignment
+
+Utility scripts use one of two base themes:
+
+**clipboard.rasi** (dropdown with search): power, clipboard, screenshot, media, keybindings, websearch, bookmarks, calculator, emoji, rofi keys
+
+**simple.rasi** (single-column list): bluetooth, display, systemd, git-profile, tmux, projects, obsidian, obsidian-search, obsidian-create
+
 ## Dependencies
 
 ### Required
 
-- **rofi** - Menu framework
-- **picom** - Compositor (dual_kawase blur, transparency)
+- **rofi** (1.7+) - Menu framework
+- **picom** - Compositor (transparency, corner radius)
 - **i3** - Window manager
+- **feh** - Wallpaper setter (writes `~/.fehbg`)
 - **JetBrainsMono Nerd Font** - Icon font used throughout
 - **dunst** / **notify-send** - Desktop notifications
 
@@ -138,70 +151,59 @@ Each menu is invoked with `-theme path/to/menu.rasi`, so the global `config.rasi
 | Screenshot | `maim`, `xclip`, `xdotool` |
 | Clipboard | `greenclip` (daemon, auto-started by i3) |
 | Emoji | `rofimoji` (via pipx) |
-| Calculator | `rofi-calc` plugin (built from source) |
+| Calculator | `rofi-calc` plugin |
 | Media | `playerctl` |
-| Wallpaper | `feh` |
+| Wallpaper | `feh`, `ImageMagick` (thumbnails) |
+| Wallpaper (live preview) | `rofi-blocks` plugin (optional, falls back to dmenu) |
 | Bluetooth | `bluetoothctl` (from `bluez-utils`) |
 | Display | `xrandr` |
 | Systemd | `pkexec` (for privilege elevation) |
 | Bookmarks | `sqlite3`, `firefox` |
-| Web Search | `curl`, `jq`, `python3`, optionally `rofi-blocks` plugin |
+| Web Search | `curl`, `jq`, `python3` |
 | Projects | `code` (VS Code), `kitty` |
 | Obsidian | `code` (VS Code) |
 | Tmux | `tmux`, `kitty` |
+| Style Previews | `maim` (for generating screenshots) |
 
 ## Configuration
 
-### Picom Integration
+### Changing Launcher Style
 
-The following picom.conf settings are critical:
+1. Press `$mod+Shift+d` to open the style selector
+2. Select a style from the visual preview grid
+3. Selection is saved to `style.conf` and used on next `$mod+Space`
 
-- `blur-method = "dual_kawase"` and `blur-strength = 8` - enables blur behind rofi
-- `"100:class_g = 'Rofi'"` in `opacity-rule` - prevents picom from reducing rofi's opacity
-- Rofi is in `rounded-corners-exclude` - fullscreen window should not get rounded corners
-- Rofi is NOT in `blur-background-exclude` - blur must apply
-
-### i3 Integration
-
-- All keybindings are in `~/.config/i3/config` under categorized sections
-- `exec --no-startup-id greenclip daemon` in autostart
-- `exec_always --no-startup-id ~/.fehbg` for wallpaper persistence
-- `$mod+Shift+e` replaced i3-nagbar exit with `rofi-power.sh`
-
-### Adding a New Menu
-
-1. Create a theme file in `themes/` that imports the appropriate base:
-
-   ```rasi
-   /* My new menu theme */
-   @import "shared/list-menu"
-
-   listview { columns: 1; lines: 8; }
-   textbox-prompt-colon { str: "icon "; }
-   mode-switcher { enabled: false; }
-   ```
-
-2. Create a script in `scripts/` following the pattern:
-
-   ```bash
-   #!/usr/bin/env bash
-   THEME="$HOME/.config/rofi/themes/my-menu.rasi"
-   # ... build options ...
-   chosen=$(echo -e "$options" | rofi -dmenu -theme "$THEME" -p "Prompt" -mesg "Description")
-   # ... handle selection ...
-   ```
-
-3. Add keybinding in `~/.config/i3/config`:
-
-   ```
-   bindsym $mod+key exec --no-startup-id ~/.config/rofi/scripts/my-script.sh
-   ```
-
-4. Reload i3: `$mod+Shift+r`
+Or manually: `echo "rofiStyle=style_5" > ~/.config/rofi/style.conf`
 
 ### Customizing Colors
 
-Edit `themes/shared/catppuccin-mocha.rasi`. All variables use the `cm-` prefix. To switch to a different Catppuccin flavor (Latte, Frappe, Macchiato), replace the hex values.
+Edit `themes/theme.rasi` to change the HyDE color variables. The mapping is:
+
+| Variable | Catppuccin Mocha Color |
+|---|---|
+| `main-bg` | Base (#1E1E2E) with alpha |
+| `main-fg` | Text (#CDD6F4) |
+| `main-br` | Mauve (#CBA6F7) |
+| `main-ex` | Rosewater (#F5E0DC) |
+| `select-bg` | Lavender (#B4BEFE) |
+| `select-fg` | Base (#1E1E2B) |
+
+### Generating Style Previews
+
+Run `~/.config/rofi/scripts/generate-previews.sh` to screenshot each style. Requires a display and `maim`.
+
+### Adding a New Menu
+
+1. Create a script in `scripts/` using `clipboard.rasi` or `simple.rasi`:
+
+   ```bash
+   #!/usr/bin/env bash
+   THEME="$HOME/.config/rofi/themes/simple.rasi"
+   chosen=$(echo -e "$options" | rofi -dmenu -theme "$THEME" -p "Prompt")
+   ```
+
+2. Add keybinding in `~/.config/i3/config`
+3. Reload i3: `$mod+Shift+r`
 
 ### Git Profiles
 
@@ -214,50 +216,39 @@ Personal|username|you@personal.com
 
 ### Obsidian Vault
 
-The default vault path is `~/powerhouse/`. To change it, edit the `VAULT_DIR` variable in:
-
-- `scripts/rofi-obsidian.sh`
-- `scripts/rofi-obsidian-search.sh`
-- `scripts/rofi-obsidian-create.sh`
+Default vault path is `~/powerhouse/`. Edit `VAULT_DIR` in the obsidian scripts to change.
 
 ### Project Directory
 
-The default project directory is `~/work/`. To change it, edit `PROJECTS_DIR` in `scripts/rofi-projects.sh`.
+Default is `~/work/`. Edit `PROJECTS_DIR` in `scripts/rofi-projects.sh`.
 
 ## Troubleshooting
 
-### No blur behind rofi
+### Launcher shows wrong style
 
-- Check picom is running: `pgrep picom`
-- Verify `blur-method = "dual_kawase"` in picom.conf
-- Ensure Rofi is NOT in `blur-background-exclude`
-- Restart picom: `pkill picom && picom -b`
+- Check `style.conf` contents: `cat ~/.config/rofi/style.conf`
+- Ensure the style file exists in `themes/`
 
-### Rofi shows with wrong theme / old style
+### No wallpaper in launcher sidebar
 
-- Each keybinding passes `-theme` explicitly
-- Check that `config.rasi` has NO theme section (configuration only)
-- Verify theme file path in i3 config or script
+- Check `~/.fehbg` exists and contains a valid wallpaper path
+- Verify wallpaper file exists at the path in `~/.fehbg`
+
+### Style selector shows no previews
+
+- Run `generate-previews.sh` to create preview assets
+- Check `themes/assets/` for `.png` files
 
 ### Greenclip not working
 
 - Check daemon: `pgrep greenclip`
 - Start manually: `greenclip daemon &`
-- i3 autostart should handle this on login
 
 ### Calculator not showing
 
-- Verify rofi-calc plugin is installed: `rofi -dump-config | grep calc`
-- Build from source if needed
+- Verify rofi-calc plugin: `rofi -dump-config | grep calc`
 
 ### Emoji picker not working
 
-- Verify rofimoji: `which rofimoji`
+- Verify: `which rofimoji`
 - Install: `pipx install rofimoji`
-
-## File Count
-
-- 4 shared themes + 19 per-menu themes = 23 theme files
-- 17 scripts + 4 API scripts = 21 script files
-- 1 global config + 1 git-profiles config + 1 README = 3 other files
-- **Total: 47 files**
