@@ -1,72 +1,74 @@
 #!/usr/bin/env bash
 #
-# rofi-wallpaper.sh — Wallpaper selector using feh
+# rofi-wallpaper.sh — Two-step wallpaper browser
 #
-# Description:
-#   Lists all image files from ~/walls/ in a rofi dmenu, displayed as
-#   category/filename (e.g. "tech-terminal/old-computer.png"), and applies
-#   the selected image as the desktop wallpaper using feh.
-#   feh's --bg-fill mode scales the image to fill the screen while
-#   preserving aspect ratio (cropping edges if necessary).
-#
-# Keybinding: $mod+Shift+w (defined in i3 config)
-#
-# Dependencies:
-#   - rofi        : menu launcher (dmenu mode)
-#   - feh         : lightweight image viewer, used here to set wallpaper
-#   - find        : lists image files by extension
-#   - notify-send : success/error notifications (typically via dunst)
-#
-# Usage:
-#   ~/.config/rofi/scripts/rofi-wallpaper.sh
-#
-# Notes:
-#   feh --bg-fill writes a script to ~/.fehbg that records the last-set
-#   wallpaper command. The i3 config runs "exec ~/.fehbg" on startup,
-#   which means the selected wallpaper automatically persists across
-#   reboots and i3 restarts without any additional configuration.
+# Step 1: Category grid with preview thumbnails
+# Step 2: Horizontal wallpaper slider with live preview (rofi-blocks)
 
-# Path to the dedicated rofi theme for the wallpaper picker
-THEME="$HOME/.config/rofi/themes/wallpaper.rasi"
+ROFI_DIR="$HOME/.config/rofi"
+THEME_DIR="$ROFI_DIR/themes"
+WALL_DIR="$HOME/walls"
+CACHE_DIR="$HOME/.cache/rofi-wallpaper"
 
-# Directory containing wallpaper images organized in category subdirectories
-WALLPAPER_DIR="$HOME/walls"
-
-# Guard: exit early if the wallpapers directory doesn't exist. This
-# prevents confusing "empty list" behavior on a new machine.
-if [[ ! -d "$WALLPAPER_DIR" ]]; then
-    notify-send "Error" "Wallpapers directory not found" -u critical
+if [[ ! -d "$WALL_DIR" ]]; then
+    notify-send "Error" "Wallpapers directory not found: $WALL_DIR" -u critical
     exit 1
 fi
 
-# --------------------------------------------------------------------------
-# List image files from all category subdirectories.
-#
-# -mindepth 2 : skip files in the top-level directory (README, etc.)
-# -maxdepth 2 : only go one level deep into category folders
-# -type f     : only regular files (skip directories and symlinks)
-# -iname      : case-insensitive match for common image extensions
-#
-# sed strips the WALLPAPER_DIR prefix to produce "category/filename.ext"
-# entries for a clean, browsable list. Pipe through sort for stable order.
-# --------------------------------------------------------------------------
-wallpapers=$(find "$WALLPAPER_DIR" -mindepth 2 -maxdepth 2 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" -o -iname "*.bmp" \) | sed "s|^$WALLPAPER_DIR/||" | sort)
+mkdir -p "$CACHE_DIR/thumbs"
 
-# If no images were found, notify the user and exit gracefully rather
-# than showing an empty rofi menu.
-if [[ -z "$wallpapers" ]]; then
-    notify-send "Wallpapers" "No images found in $WALLPAPER_DIR" -u normal
+# Generate category thumbnails (random image from each folder)
+generate_category_thumbs() {
+    for dir in "$WALL_DIR"/*/; do
+        [[ -d "$dir" ]] || continue
+        cat_name=$(basename "$dir")
+        thumb="$CACHE_DIR/thumbs/$cat_name.png"
+        # Only regenerate if missing or older than 1 hour
+        if [[ ! -f "$thumb" ]] || [[ $(find "$thumb" -mmin +60 2>/dev/null) ]]; then
+            # Pick a random image from the category
+            img=$(find "$dir" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | shuf -n1)
+            if [[ -n "$img" ]]; then
+                convert "$img" -resize 400x225^ -gravity center -extent 400x225 "$thumb" 2>/dev/null
+            fi
+        fi
+    done
+}
+
+generate_category_thumbs
+
+# Build category entries with preview icons
+entries=""
+for dir in "$WALL_DIR"/*/; do
+    [[ -d "$dir" ]] || continue
+    cat_name=$(basename "$dir")
+    count=$(find "$dir" -maxdepth 1 -type f \( -iname "*.jpg" -o -iname "*.jpeg" -o -iname "*.png" -o -iname "*.webp" \) | wc -l)
+    thumb="$CACHE_DIR/thumbs/$cat_name.png"
+    if [[ -f "$thumb" ]]; then
+        entries+="$cat_name ($count)\x00icon\x1f$thumb\n"
+    else
+        entries+="$cat_name ($count)\n"
+    fi
+done
+
+# Step 1: Category selector (6-column grid)
+r_override="window{width:80%;}
+    listview{columns:4;lines:2;}
+    element{orientation:vertical;border-radius:16px;padding:1em;}
+    element-icon{border-radius:12px;size:14em;}
+    element-text{horizontal-align:0.5;}"
+
+chosen_cat=$(echo -en "$entries" | rofi -dmenu \
+    -theme "$THEME_DIR/selector" \
+    -theme-str "$r_override" \
+    -p "Category" \
+    -mesg "Select a wallpaper category")
+
+if [[ -z "$chosen_cat" ]]; then
     exit 0
 fi
 
-chosen=$(echo "$wallpapers" | rofi -dmenu -theme "$THEME" -p "Wallpaper" -mesg "Select wallpaper  ·  $(echo "$wallpapers" | wc -l) available")
+# Strip the count suffix: "dark-minimal (15)" -> "dark-minimal"
+chosen_cat=$(echo "$chosen_cat" | sed 's/ ([0-9]*)$//')
 
-# Only act if the user made a selection (pressing Escape returns empty).
-if [[ -n "$chosen" ]]; then
-    # --bg-fill scales the image to fill the entire screen, cropping if the
-    # aspect ratios differ. This is preferred over --bg-scale (which may
-    # letterbox) or --bg-center (which may leave gaps on smaller images).
-    # As a side effect, feh writes ~/.fehbg so the choice persists on restart.
-    feh --bg-fill "$WALLPAPER_DIR/$chosen"
-    notify-send "Wallpaper Set" "$chosen" -t 3000
-fi
+# Step 2: Launch the wallpaper slider for the selected category
+exec "$ROFI_DIR/scripts/rofi-wallpaper-slider.sh" "$chosen_cat"
