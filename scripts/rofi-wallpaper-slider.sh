@@ -1,9 +1,9 @@
 #!/usr/bin/env bash
 #
-# rofi-wallpaper-slider.sh — Horizontal wallpaper browser with live preview
+# rofi-wallpaper-slider.sh — Horizontal wallpaper browser
 #
-# Uses rofi-blocks for dynamic content. As the user navigates wallpapers,
-# feh applies each one in real-time. Enter persists, Escape reverts.
+# Shows wallpaper thumbnails in a horizontal grid using dmenu mode.
+# Enter applies the wallpaper and closes. Escape reverts to original.
 #
 # Usage: rofi-wallpaper-slider.sh <category>
 #   category: subdirectory name under ~/walls/
@@ -30,71 +30,16 @@ if [[ -f "$HOME/.fehbg" ]]; then
 fi
 
 # Generate thumbnails for all wallpapers in category
-generate_thumbs() {
-    for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
-        [[ -f "$img" ]] || continue
-        base=$(basename "$img")
-        thumb="$THUMB_DIR/$base"
-        if [[ ! -f "$thumb" ]]; then
-            convert "$img" -resize 300x169^ -gravity center -extent 300x169 "$thumb" 2>/dev/null
-        fi
-    done
-}
-
-generate_thumbs
-
-# Create the rofi-blocks wrapper script
-WRAPPER=$(mktemp /tmp/rofi-wall-XXXX.sh)
-cat > "$WRAPPER" << 'WRAPEOF'
-#!/usr/bin/env bash
-CAT_DIR="$1"
-THUMB_DIR="$2"
-ORIGINAL_WALL="$3"
-
-# Build initial JSON with all wallpapers
-build_json() {
-    local lines=""
-    local first=true
-    for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
-        [[ -f "$img" ]] || continue
-        base=$(basename "$img")
-        thumb="$THUMB_DIR/$base"
-        icon_str=""
-        [[ -f "$thumb" ]] && icon_str=",\"icon\":\"$thumb\""
-        $first || lines+=","
-        first=false
-        lines+="{\"text\":\"$base\"$icon_str}"
-    done
-    echo "{\"lines\":[$lines],\"prompt\":\"$CATEGORY\",\"message\":\"Navigate: Ctrl+h/l | Enter: apply | Esc: revert\"}"
-}
-
-build_json
-
-# Read events from rofi
-while IFS= read -r line; do
-    # rofi-blocks sends the selected entry name
-    if [[ -n "$line" ]]; then
-        # Check if this is a selection event (user pressed Enter)
-        name=$(echo "$line" | jq -r '.value // .name // empty' 2>/dev/null)
-        if [[ -z "$name" ]]; then
-            name="$line"
-        fi
-        # Apply wallpaper as live preview
-        full_path="$CAT_DIR/$name"
-        if [[ -f "$full_path" ]]; then
-            feh --bg-fill "$full_path" 2>/dev/null
-        fi
+for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
+    [[ -f "$img" ]] || continue
+    base=$(basename "$img")
+    thumb="$THUMB_DIR/$base"
+    if [[ ! -f "$thumb" ]]; then
+        convert "$img" -resize 300x169^ -gravity center -extent 300x169 "$thumb" 2>/dev/null
     fi
 done
 
-# If we reach here without selection (Escape), revert
-if [[ -n "$ORIGINAL_WALL" && -f "$ORIGINAL_WALL" ]]; then
-    feh --bg-fill "$ORIGINAL_WALL" 2>/dev/null
-fi
-WRAPEOF
-chmod +x "$WRAPPER"
-
-# Build entries for non-blocks fallback (dmenu mode with icons)
+# Build sorted entries with thumbnails
 entries=""
 for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
     [[ -f "$img" ]] || continue
@@ -107,18 +52,13 @@ for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
     fi
 done
 
-# Try rofi-blocks first, fallback to dmenu
-if rofi -dump-config 2>/dev/null | grep -q blocks; then
-    chosen=$(rofi -modi "blocks" -show blocks \
-        -blocks-wrap "$WRAPPER $CAT_DIR $THUMB_DIR $ORIGINAL_WALL" \
-        -theme "$THEME_DIR/wallpaper-slider" \
-        -show-icons)
-else
-    chosen=$(echo -en "$entries" | rofi -dmenu \
-        -theme "$THEME_DIR/wallpaper-slider" \
-        -p "$CATEGORY" \
-        -mesg "Select wallpaper | Enter: apply | Esc: cancel")
-fi
+# Launch rofi in dmenu mode with thumbnails
+chosen=$(echo -en "$entries" | sort -V | rofi -dmenu \
+    -theme "$THEME_DIR/wallpaper-slider" \
+    -theme-str 'configuration {show-icons: true;}' \
+    -show-icons \
+    -p "$CATEGORY" \
+    -mesg "Enter: apply | Esc: cancel")
 
 # Handle result
 if [[ -n "$chosen" ]]; then
@@ -130,6 +70,3 @@ else
         feh --bg-fill "$ORIGINAL_WALL"
     fi
 fi
-
-# Cleanup
-rm -f "$WRAPPER"

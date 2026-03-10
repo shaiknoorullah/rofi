@@ -2,6 +2,7 @@
  * Maps Catppuccin Mocha palette to HyDE's expected variable names.
  * All ported HyDE styles reference these variables. */
 * {
+    font:                "JetBrainsMono Nerd Font 10";
     main-bg:            #1E1E2Ee6;
     main-fg:            #CDD6F4ff;
     main-br:            #CBA6F7ff;

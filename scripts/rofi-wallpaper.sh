@@ -59,7 +59,9 @@ r_override="window{width:80%;}
 
 chosen_cat=$(echo -en "$entries" | rofi -dmenu \
     -theme "$THEME_DIR/selector" \
+    -theme-str 'configuration {show-icons: true;}' \
     -theme-str "$r_override" \
+    -show-icons \
     -p "Category" \
     -mesg "Select a wallpaper category")
 
