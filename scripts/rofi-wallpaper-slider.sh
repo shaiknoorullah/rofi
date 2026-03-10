@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 #
-# rofi-wallpaper-slider.sh — Horizontal wallpaper browser with live preview
+# rofi-wallpaper-slider.sh — Horizontal wallpaper browser
 #
-# Shows wallpaper thumbnails in a horizontal grid. Uses a re-open loop
-# for live preview: Enter previews (applies wallpaper + re-opens rofi
-# at the same position), Ctrl+Enter confirms, Escape reverts.
+# Shows wallpaper thumbnails in a horizontal grid using dmenu mode.
+# Enter applies the wallpaper and closes. Escape reverts to original.
 #
 # Usage: rofi-wallpaper-slider.sh <category>
 #   category: subdirectory name under ~/walls/
@@ -53,59 +52,21 @@ for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
     fi
 done
 
-# Sort entries once into a temp file for consistent re-use
-SORTED_ENTRIES=$(mktemp /tmp/rofi-wall-entries-XXXX)
-echo -en "$entries" | sort -V > "$SORTED_ENTRIES"
+# Launch rofi in dmenu mode with thumbnails
+chosen=$(echo -en "$entries" | sort -V | rofi -dmenu \
+    -theme "$THEME_DIR/wallpaper-slider" \
+    -theme-str 'configuration {show-icons: true;}' \
+    -show-icons \
+    -p "$CATEGORY" \
+    -mesg "Enter: apply | Esc: cancel")
 
-# Live preview loop
-# - Enter (kb-custom-1, exit 10): preview wallpaper + re-open at same position
-# - Ctrl+Enter (kb-accept-entry, exit 0): confirm and close
-# - Escape (exit 1): revert and close
-selected_row=0
-
-while true; do
-    result=$(cat "$SORTED_ENTRIES" | rofi -dmenu \
-        -theme "$THEME_DIR/wallpaper-slider" \
-        -theme-str 'configuration {show-icons: true;}' \
-        -show-icons \
-        -selected-row "$selected_row" \
-        -format 'i:s' \
-        -kb-accept-entry "Control+Return" \
-        -kb-custom-1 "Return,KP_Enter" \
-        -p "$CATEGORY" \
-        -mesg "Enter: preview | Ctrl+Enter: apply | Esc: revert")
-
-    exit_code=$?
-
-    # Parse index and filename from "index:filename" format
-    row="${result%%:*}"
-    name="${result#*:}"
-
-    case $exit_code in
-        10)
-            # Enter = live preview
-            [[ -n "$row" ]] && selected_row=$row
-            if [[ -n "$name" && -f "$CAT_DIR/$name" ]]; then
-                feh --bg-fill "$CAT_DIR/$name" 2>/dev/null
-            fi
-            ;;
-        0)
-            # Ctrl+Enter = confirm selection
-            if [[ -n "$name" && -f "$CAT_DIR/$name" ]]; then
-                feh --bg-fill "$CAT_DIR/$name"
-                notify-send "Wallpaper Set" "$CATEGORY/$name" -t 3000
-            fi
-            break
-            ;;
-        *)
-            # Escape = revert to original
-            if [[ -n "$ORIGINAL_WALL" && -f "$ORIGINAL_WALL" ]]; then
-                feh --bg-fill "$ORIGINAL_WALL"
-            fi
-            break
-            ;;
-    esac
-done
-
-# Cleanup
-rm -f "$SORTED_ENTRIES"
+# Handle result
+if [[ -n "$chosen" ]]; then
+    feh --bg-fill "$CAT_DIR/$chosen"
+    notify-send "Wallpaper Set" "$CATEGORY/$chosen" -t 3000
+else
+    # Revert on Escape
+    if [[ -n "$ORIGINAL_WALL" && -f "$ORIGINAL_WALL" ]]; then
+        feh --bg-fill "$ORIGINAL_WALL"
+    fi
+fi
