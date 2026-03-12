@@ -1,0 +1,26 @@
+# User-specific configs (ship .example versions, user copies to create their own)
+scripts/zen-workspaces.conf
+scripts/git-profiles.conf
+
+# Caches
+*.sqlite
+*.sqlite-wal
+*.sqlite-shm
+/scripts/*.cache
+/scripts/*.tsv
+
+# OS
+.DS_Store
+Thumbs.db
+*~
+
+# Editor
+*.swp
+*.swo
+.vscode/
+.idea/
+
+# Temp
+/tmp/
+*.tmp
+*.bak

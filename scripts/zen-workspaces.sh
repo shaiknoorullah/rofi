@@ -14,6 +14,7 @@ source "$SCRIPT_DIR/zen-utils.sh"
 
 THEME="$HOME/.config/rofi/themes/simple.rasi"
 CONFIG="$SCRIPT_DIR/zen-workspaces.conf"
+[[ ! -f "$CONFIG" ]] && CONFIG="$SCRIPT_DIR/zen-workspaces.example.conf"
 
 # Parse workspace config
 get_groups() {

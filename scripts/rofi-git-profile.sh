@@ -33,6 +33,7 @@ THEME="$HOME/.config/rofi/themes/simple.rasi"
 # Path to the profiles config file. Lives alongside this script so all
 # rofi script data is co-located in ~/.config/rofi/scripts/.
 PROFILES_FILE="$HOME/.config/rofi/scripts/git-profiles.conf"
+[[ ! -f "$PROFILES_FILE" ]] && PROFILES_FILE="$HOME/.config/rofi/scripts/git-profiles.example.conf"
 
 # Guard: exit early if the profiles config doesn't exist.
 if [[ ! -f "$PROFILES_FILE" ]]; then
