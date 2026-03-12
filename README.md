@@ -1,94 +1,107 @@
-# Rofi Mega-Setup
+<p align="center">
+  <strong><code>~/.config/rofi</code></strong>
+  <br><br>
+  <code>rofi, but it does everything now</code>
+</p>
 
-Rofi configured as a unified command center with 20+ functions. HyDE-inspired windowed launcher styles with Catppuccin Mocha theme, designed for i3/X11.
+<p align="center">
 
-## Architecture
+![Shell](https://img.shields.io/badge/shell-bash-4EAA25?style=flat-square&logo=gnu-bash&logoColor=white)
+![License](https://img.shields.io/badge/license-MIT-blue?style=flat-square)
+![Rofi](https://img.shields.io/badge/rofi-1.7+-77216F?style=flat-square)
+![i3](https://img.shields.io/badge/wm-i3-318CE7?style=flat-square&logo=i3&logoColor=white)
+![Stars](https://img.shields.io/github/stars/shaiknoorullah/rofi?style=flat-square&color=yellow)
+![works on my machine](https://img.shields.io/badge/works-on%20my%20machine-success?style=flat-square)
 
-### HyDE Theme System
+</p>
 
-The theme system is ported from [HyDE](https://github.com/HyDE-Project/HyDE), adapted for i3/X11:
+**27 rofi menus. 12 launcher styles. zen browser integration.** rofi as a unified command center for i3/X11. HyDE-inspired themes, and a keybinding for everything.
 
-- **12 windowed launcher styles** — each a self-contained `.rasi` file with unique layouts (sidebar, split-panel, grid, etc.)
-- **Launchpad** — fullscreen macOS-style 7x5 icon grid
-- **Style selector** — visual grid for switching styles, saved to `style.conf`
-- **Dynamic wallpaper injection** — launcher reads current wallpaper from `~/.fehbg` and injects it at runtime
-- **Runtime overrides** — border radius (from picom), font, and icon theme applied via `-theme-str`
+## what's in the box
 
-### Theme Layering
+**20+ menus** covering just about everything:
+- app launcher, power, clipboard, screenshot, bluetooth, display, wallpaper, media, systemd, calculator, emoji, web search, bookmarks, tab switcher, workspace manager, git profiles, tmux, projects, obsidian, keybindings
 
-```
-theme.rasi                  <- HyDE-compatible color mapping (Catppuccin Mocha → HyDE vars)
-    |
-+-- style_{1..12}.rasi      <- 12 launcher styles (self-contained, import theme.rasi)
-+-- launchpad.rasi           <- Fullscreen app grid
-+-- selector.rasi            <- Style selector preview grid
-+-- clipboard.rasi           <- Dropdown utility menu (search + scrollable list)
-+-- simple.rasi              <- Single-column utility menu
-+-- wallpaper-slider.rasi    <- Horizontal wallpaper browser
-+-- searchbar.rasi           <- Fullscreen overlay search bar (centered input + dropdown)
-```
+**12 windowed launcher styles** ported from HyDE:
+- sidebar, split-panel, grid, gradient variants — each a self-contained `.rasi` theme with dynamic wallpaper injection
 
-`catppuccin-mocha.rasi` (in `shared/`) contains the full Catppuccin Mocha palette for reference.
+**zen browser integration** built on brotab and fzf:
+- fuzzy tab search with favicon preview
+- browser-style search bar with live autocomplete and bang syntax
+- domain-based tab grouping
 
-## Directory Structure
+## getting started
 
-```
-~/.config/rofi/
-├── README.md                    <- This file
-├── config.rasi                  <- Global config (modi, matching, icons - NO theme)
-├── style.conf                   <- Saved launcher style preference
-├── themes/
-│   ├── shared/
-│   │   └── catppuccin-mocha.rasi  <- Full Catppuccin Mocha palette (reference)
-│   ├── theme.rasi                 <- HyDE color variable mapping
-│   ├── style_{1..12}.rasi         <- 12 launcher styles
-│   ├── launchpad.rasi             <- Fullscreen app grid
-│   ├── selector.rasi              <- Style selector grid
-│   ├── clipboard.rasi             <- Dropdown utility menu
-│   ├── simple.rasi                <- Single-column utility menu
-│   ├── wallpaper-slider.rasi      <- Horizontal wallpaper browser
-│   └── assets/                    <- Style preview images (for selector)
-├── scripts/
-│   ├── rofilaunch.sh              <- Main launcher (reads style.conf + wallpaper)
-│   ├── rofi-style-selector.sh     <- Visual style switcher
-│   ├── rofi-wallpaper.sh          <- Wallpaper browser (category grid)
-│   ├── rofi-wallpaper-slider.sh   <- Wallpaper slider (rofi-blocks + live preview)
-│   ├── generate-previews.sh       <- Screenshot each style for selector assets
-│   ├── rofi-power.sh              <- Power menu
-│   ├── rofi-media.sh              <- Media controls
-│   ├── rofi-screenshot.sh         <- Screenshot tool
-│   ├── rofi-keybindings.sh        <- i3 keybinding viewer
-│   ├── rofi-wallpaper.sh          <- Wallpaper category selector
-│   ├── rofi-clipboard.sh          <- Clipboard (greenclip wrapper)
-│   ├── rofi-git-profile.sh        <- Git profile switcher
-│   ├── rofi-tmux.sh               <- Tmux session manager
-│   ├── rofi-projects.sh           <- Project launcher
-│   ├── rofi-obsidian.sh           <- Obsidian quick actions hub
-│   ├── rofi-obsidian-search.sh    <- Obsidian note search
-│   ├── rofi-obsidian-create.sh    <- Obsidian note creator
-│   ├── rofi-bluetooth.sh          <- Bluetooth manager
-│   ├── rofi-display.sh            <- Display layout manager
-│   ├── rofi-systemd.sh            <- Systemd service manager
-│   ├── rofi-bookmarks.sh          <- Zen Browser bookmark browser
-│   ├── rofi-websearch.sh          <- Web search (legacy, two-step)
-│   ├── rofi-websearch-v2.sh       <- Browser-style search bar with live suggestions
-│   ├── zen-utils.sh               <- Shared utilities for Zen Browser scripts
-│   ├── zen-tab-switcher.sh        <- fzf-based tab search with preview
-│   ├── zen-tab-preview.sh         <- fzf preview pane (favicon + metadata)
-│   ├── zen-tab-popup.sh           <- Popup launcher (kitty/tmux)
-│   ├── zen-search-handler.sh      <- rofi-blocks handler (bangs + suggestions)
-│   ├── zen-workspaces.sh          <- Tab group manager
-│   ├── zen-workspaces.conf        <- Tab group definitions (domain patterns)
-│   ├── git-profiles.conf          <- Git profile definitions
-│   └── apis/
-│       ├── google-suggest.sh      <- Google autocomplete API
-│       ├── ddg-suggest.sh         <- DuckDuckGo autocomplete API
-│       ├── youtube-suggest.sh     <- YouTube suggestions API
-│       ├── wikipedia-suggest.sh   <- Wikipedia OpenSearch API
-│       └── suggest-aggregator.sh  <- Unified suggestions (API + bookmarks + history)
+1. clone the repo
+2. install dependencies (see [dependencies](#dependencies))
+3. copy example configs
+4. add i3 keybindings
+5. reload i3
+
+```bash
+# clone
+git clone https://github.com/shaiknoorullah/rofi.git ~/.config/rofi
+
+# copy example configs
+cp ~/.config/rofi/scripts/zen-workspaces.example.conf ~/.config/rofi/scripts/zen-workspaces.conf
+cp ~/.config/rofi/scripts/git-profiles.example.conf ~/.config/rofi/scripts/git-profiles.conf
+
+# add to your i3 config (scripts expect to live at ~/.config/rofi/)
+# see the keybinding table below for the full list
+# example:
+#   bindsym $mod+Space exec ~/.config/rofi/scripts/rofilaunch.sh d
+#   bindsym $mod+Shift+e exec ~/.config/rofi/scripts/rofi-power.sh
+
+# reload i3
+# $mod+Shift+r
 ```
 
-## Launcher Styles
+## how to use
+
+every menu is a keybinding away. organized by category:
+
+**core** — launchers and navigation
+**system** — hardware, display, wallpaper, power
+**productivity** — calculator, emoji, search
+**developer** — git, tmux, projects
+**browser** — zen tabs, bookmarks, tab groups
+**notes** — obsidian vault actions and search
+
+### keybindings
+
+| Keybinding | Menu | Script |
+|---|---|---|
+| `$mod+Space` | App Launcher | `rofilaunch.sh d` |
+| `$mod+Tab` | Window Switcher | `rofilaunch.sh w` |
+| `$mod+Shift+s` | Run Command | `rofilaunch.sh --run` |
+| `$mod+Shift+f` | File Browser | `rofilaunch.sh f` |
+| `$mod+Shift+d` | Style Selector | `rofi-style-selector.sh` |
+| `$mod+Shift+e` | Power Menu | `rofi-power.sh` |
+| `$mod+c` | Clipboard | `rofi-clipboard.sh` |
+| `$mod+Shift+b` | Bluetooth | `rofi-bluetooth.sh` |
+| `$mod+Shift+m` | Display Manager | `rofi-display.sh` |
+| `$mod+Shift+w` | Wallpaper Browser | `rofi-wallpaper.sh` |
+| `Print` | Screenshot | `rofi-screenshot.sh` |
+| `$mod+Shift+p` | Systemd Services | `rofi-systemd.sh` |
+| `$mod+equal` | Calculator | `rofi -show calc` |
+| `$mod+period` | Emoji Picker | `rofimoji` |
+| `$mod+slash` | Web Search | `rofi-websearch-v2.sh` |
+| `$mod+p` | Project Manager | `rofi-projects.sh` |
+| `$mod+g` | Git Profile Switcher | `rofi-git-profile.sh` |
+| `$mod+t` | Tmux Sessions | `rofi-tmux.sh` |
+| `$mod+Shift+o` | Zen Bookmarks | `rofi-bookmarks.sh` |
+| `$mod+grave` | Zen Tab Switcher | `zen-tab-popup.sh` |
+| `$mod+Shift+t` | Zen Tab Groups | `zen-workspaces.sh` |
+| `$mod+n` | Obsidian Actions | `rofi-obsidian.sh` |
+| `$mod+Shift+n` | Obsidian Search | `rofi-obsidian-search.sh` |
+| `$mod+F1` | Rofi Keys | `rofi -show keys` |
+| `$mod+F2` | i3 Keybindings | `rofi-keybindings.sh` |
+| `$mod+m` | Media Controls | `rofi-media.sh` |
+| `prefix+b` | Zen Tab Switcher (tmux) | `zen-tab-switcher.sh` |
+
+## launcher styles
+
+12 windowed styles ported from HyDE, plus a fullscreen launchpad. switch with `$mod+Shift+d`.
 
 | Style | Layout | Size |
 |-------|--------|------|
@@ -106,175 +119,27 @@ theme.rasi                  <- HyDE-compatible color mapping (Catppuccin Mocha �
 | style_12 | GradientView — list left, gradient wallpaper right | 60x30em |
 | launchpad | Fullscreen 7x5 icon grid | fullscreen |
 
-## Keybinding Reference
+## zen browser
 
-| Keybinding | Menu | Type | Script/Command |
-|---|---|---|---|
-| `$mod+Space` | App Launcher | Core | `rofilaunch.sh d` |
-| `$mod+Tab` | Window Switcher | Core | `rofilaunch.sh w` |
-| `$mod+Shift+s` | Run Command | Core | `rofilaunch.sh --run` |
-| `$mod+Shift+f` | File Browser | Core | `rofilaunch.sh f` |
-| `$mod+Shift+d` | Style Selector | Core | `rofi-style-selector.sh` |
-| `$mod+F1` | Rofi Keys | Core | `rofi -show keys` |
-| `$mod+Shift+e` | Power Menu | System | `rofi-power.sh` |
-| `$mod+c` | Clipboard | System | `rofi-clipboard.sh` |
-| `$mod+Shift+b` | Bluetooth | System | `rofi-bluetooth.sh` |
-| `$mod+Shift+m` | Display Manager | System | `rofi-display.sh` |
-| `$mod+Shift+w` | Wallpaper Browser | System | `rofi-wallpaper.sh` |
-| `Print` | Screenshot | System | `rofi-screenshot.sh` |
-| `$mod+Shift+p` | Systemd Services | System | `rofi-systemd.sh` |
-| `$mod+equal` | Calculator | Productivity | `rofi -show calc` |
-| `$mod+period` | Emoji Picker | Productivity | `rofimoji` |
-| `$mod+slash` | Web Search | Productivity | `rofi-websearch-v2.sh` |
-| `$mod+p` | Project Manager | Developer | `rofi-projects.sh` |
-| `$mod+g` | Git Profile | Developer | `rofi-git-profile.sh` |
-| `$mod+t` | Tmux Sessions | Developer | `rofi-tmux.sh` |
-| `$mod+Shift+o` | Zen Bookmarks | Browser | `rofi-bookmarks.sh` |
-| `$mod+grave` | Zen Tab Switcher | Browser | `zen-tab-popup.sh` |
-| `$mod+Shift+t` | Zen Tab Groups | Browser | `zen-workspaces.sh` |
-| `prefix+b` | Zen Tab Switcher (tmux) | Browser | `zen-tab-switcher.sh` |
-| `$mod+n` | Obsidian Actions | Notes | `rofi-obsidian.sh` |
-| `$mod+Shift+n` | Obsidian Search | Notes | `rofi-obsidian-search.sh` |
-| `$mod+F2` | i3 Keybindings | Other | `rofi-keybindings.sh` |
-| `$mod+m` | Media Controls | Other | `rofi-media.sh` |
+three integrated systems for managing Zen Browser, built on `brotab` and `fzf`.
 
-## Theme Assignment
+### tab switcher
 
-Utility scripts use one of two base themes:
+`$mod+grave` (i3) or `prefix+b` (tmux)
 
-**clipboard.rasi** (dropdown with search): power, clipboard, screenshot, media, keybindings, websearch (legacy), bookmarks, calculator, emoji, rofi keys
-
-**simple.rasi** (single-column list): bluetooth, display, systemd, git-profile, tmux, projects, obsidian, obsidian-search, obsidian-create, zen-workspaces
-
-**searchbar.rasi** (fullscreen overlay): rofi-websearch-v2 (browser-style search bar)
-
-**fzf (kitty/tmux)**: zen-tab-switcher (not rofi-based — uses fzf with Catppuccin Mocha colors)
-
-## Dependencies
-
-### Required
-
-- **rofi** (1.7+) - Menu framework
-- **picom** - Compositor (transparency, corner radius)
-- **i3** - Window manager
-- **feh** - Wallpaper setter (writes `~/.fehbg`)
-- **JetBrainsMono Nerd Font** - Icon font used throughout
-- **dunst** / **notify-send** - Desktop notifications
-
-### Per-Feature Dependencies
-
-| Feature | Packages |
-|---|---|
-| Screenshot | `maim`, `xclip`, `xdotool` |
-| Clipboard | `greenclip` (daemon, auto-started by i3) |
-| Emoji | `rofimoji` (via pipx) |
-| Calculator | `rofi-calc` plugin |
-| Media | `playerctl` |
-| Wallpaper | `feh`, `ImageMagick` (thumbnails) |
-| Wallpaper (live preview) | `rofi-blocks` plugin (optional, falls back to dmenu) |
-| Bluetooth | `bluetoothctl` (from `bluez-utils`) |
-| Display | `xrandr` |
-| Systemd | `pkexec` (for privilege elevation) |
-| Bookmarks | `sqlite3`, Zen Browser |
-| Web Search | `curl`, `jq`, `python3` |
-| Web Search v2 | `curl`, `jq`, `python3`, `sqlite3`, `rofi-blocks` (optional) |
-| Zen Tab Switcher | `brotab`, `fzf` (0.60+), `kitty`, `xclip` |
-| Zen Tab Groups | `brotab` |
-| Projects | `code` (VS Code), `kitty` |
-| Obsidian | `code` (VS Code) |
-| Tmux | `tmux`, `kitty` |
-| Style Previews | `maim` (for generating screenshots) |
-
-## Configuration
-
-### Changing Launcher Style
-
-1. Press `$mod+Shift+d` to open the style selector
-2. Select a style from the visual preview grid
-3. Selection is saved to `style.conf` and used on next `$mod+Space`
-
-Or manually: `echo "rofiStyle=style_5" > ~/.config/rofi/style.conf`
-
-### Customizing Colors
-
-Edit `themes/theme.rasi` to change the HyDE color variables. The mapping is:
-
-| Variable | Catppuccin Mocha Color |
-|---|---|
-| `main-bg` | Base (#1E1E2E) with alpha |
-| `main-fg` | Text (#CDD6F4) |
-| `main-br` | Mauve (#CBA6F7) |
-| `main-ex` | Rosewater (#F5E0DC) |
-| `select-bg` | Lavender (#B4BEFE) |
-| `select-fg` | Base (#1E1E2B) |
-
-### Generating Style Previews
-
-Run `~/.config/rofi/scripts/generate-previews.sh` to screenshot each style. Requires a display and `maim`.
-
-### Adding a New Menu
-
-1. Create a script in `scripts/` using `clipboard.rasi` or `simple.rasi`:
-
-   ```bash
-   #!/usr/bin/env bash
-   THEME="$HOME/.config/rofi/themes/simple.rasi"
-   chosen=$(echo -e "$options" | rofi -dmenu -theme "$THEME" -p "Prompt")
-   ```
-
-2. Add keybinding in `~/.config/i3/config`
-3. Reload i3: `$mod+Shift+r`
-
-### Git Profiles
-
-Edit `scripts/git-profiles.conf` with pipe-delimited entries:
-
-```
-Work|Your Name|you@company.com
-Personal|username|you@personal.com
-```
-
-### Obsidian Vault
-
-Default vault path is `~/powerhouse/`. Edit `VAULT_DIR` in the obsidian scripts to change.
-
-### Project Directory
-
-Default is `~/work/`. Edit `PROJECTS_DIR` in `scripts/rofi-projects.sh`.
-
-## Zen Browser Integration
-
-Three integrated systems for managing Zen Browser tabs and searches, built on `brotab` and `fzf`.
-
-### Shared Library (`zen-utils.sh`)
-
-All Zen scripts source `scripts/zen-utils.sh`, which provides:
-
-- `zen_open_url` — open URL via `xdg-open`, fully detached
-- `zen_urlencode` — URL-encode stdin via Python
-- `zen_find_profile` — locate the active Zen profile under `~/.zen/`
-- `zen_query_db` — safely query `places.sqlite` (copies to `/tmp` to avoid WAL locks)
-- `zen_get_favicon` — fetch and cache favicons (Google API, 7-day TTL)
-- `zen_focus_browser` — focus Zen window via `i3-msg`
-- `zen_notify` — desktop notification helper
-
-Favicon cache: `~/.cache/zen-tabs/favicons/`
-
-### Tab Switcher (`$mod+grave` or `prefix+b`)
-
-fzf-based fuzzy search across all open tabs with favicon preview.
+fzf-based fuzzy search across all open tabs with favicon preview. launches as a floating kitty window or tmux popup.
 
 | Key | Action |
 |-----|--------|
-| `Enter` | Switch to tab |
-| `Ctrl+d` | Close tab (list refreshes) |
-| `Ctrl+y` | Copy tab URL to clipboard |
+| `Enter` | switch to tab |
+| `Ctrl+d` | close tab (list refreshes) |
+| `Ctrl+y` | copy tab URL to clipboard |
 
-Launched as a floating kitty window (i3) or tmux popup.
+### search bar
 
-### Search Bar (`$mod+slash`)
+`$mod+slash`
 
-Browser-style search bar with live autocomplete suggestions, URL detection, and bang syntax.
+browser-style search bar with live autocomplete via rofi-blocks. type a URL to navigate directly. supports bang syntax:
 
 | Bang | Engine |
 |------|--------|
@@ -284,77 +149,183 @@ Browser-style search bar with live autocomplete suggestions, URL detection, and 
 | `!w` | Wikipedia |
 | `!gh` | GitHub |
 
-Typing a URL directly (e.g., `github.com`) offers direct navigation. Suggestions combine search engine autocomplete, bookmark matches, and history matches in parallel.
+suggestions combine search engine autocomplete, bookmark matches, and history matches in parallel. falls back to simple input without rofi-blocks.
 
-Requires `rofi-blocks` for live suggestions. Falls back to a simple `rofi -dmenu` prompt without it.
+### tab groups
 
-### Tab Groups (`$mod+Shift+t`)
+`$mod+Shift+t`
 
-Workspace-style tab management with three actions:
+domain-based tab grouping with three actions:
 
-- **Switch Group** — select a configured tab group, then pick a tab within it
-- **Domain Overview** — see all domains sorted by tab count, drill into any domain
-- **Find Duplicates** — detect tabs with identical URLs, close extras (keeps one)
+- **switch group** — select a configured tab group, pick a tab within it
+- **domain overview** — all domains sorted by tab count, drill into any
+- **find duplicates** — detect tabs with identical URLs, close extras
 
-Tab groups are defined in `scripts/zen-workspaces.conf`:
+configured via `zen-workspaces.conf` (copy from `zen-workspaces.example.conf` in `scripts/`).
+
+## directory structure
 
 ```
-# Format: GroupName|domain1,domain2,domain3
-Work|github.com,linear.app,vercel.com,proficientnow
-Cloud|cloudflare.com,pnats.cloud,kubevirt
-Personal|youtube.com,reddit.com,twitter.com
+rofi/
+├── config.rasi                        # global rofi config (modi, matching, icons)
+├── style.conf                         # saved launcher style preference
+├── themes/
+│   ├── theme.rasi                     # color variables (wallust-generated)
+│   ├── style_{1..12}.rasi             # 12 launcher styles
+│   ├── launchpad.rasi                 # fullscreen app grid
+│   ├── selector.rasi                  # style selector preview grid
+│   ├── clipboard.rasi                 # dropdown utility menu
+│   ├── simple.rasi                    # single-column utility menu
+│   ├── searchbar.rasi                 # fullscreen search overlay
+│   ├── wallpaper-slider.rasi          # horizontal wallpaper browser
+│   ├── shared/
+│   │   └── catppuccin-mocha.rasi      # full catppuccin mocha palette
+│   └── assets/                        # style preview images
+├── scripts/
+│   ├── rofilaunch.sh                  # main launcher (reads style.conf + wallpaper)
+│   ├── rofi-style-selector.sh         # visual style switcher
+│   ├── rofi-power.sh                  # power menu
+│   ├── rofi-clipboard.sh             # clipboard (greenclip)
+│   ├── rofi-screenshot.sh            # screenshot tool
+│   ├── rofi-bluetooth.sh             # bluetooth manager
+│   ├── rofi-display.sh               # display layout manager
+│   ├── rofi-wallpaper.sh             # wallpaper category selector
+│   ├── rofi-wallpaper-slider.sh      # wallpaper slider (rofi-blocks)
+│   ├── rofi-media.sh                 # media controls
+│   ├── rofi-systemd.sh               # systemd service manager
+│   ├── rofi-keybindings.sh           # i3 keybinding viewer
+│   ├── rofi-git-profile.sh           # git profile switcher
+│   ├── rofi-tmux.sh                  # tmux session manager
+│   ├── rofi-projects.sh              # project launcher
+│   ├── rofi-obsidian.sh              # obsidian quick actions
+│   ├── rofi-obsidian-search.sh       # obsidian note search
+│   ├── rofi-obsidian-create.sh       # obsidian note creator
+│   ├── rofi-bookmarks.sh             # zen browser bookmarks
+│   ├── rofi-websearch.sh             # web search (legacy)
+│   ├── rofi-websearch-v2.sh          # search bar with live suggestions
+│   ├── zen-utils.sh                  # shared zen browser utilities
+│   ├── zen-tab-switcher.sh           # fzf tab search with preview
+│   ├── zen-tab-preview.sh            # fzf preview pane (favicon + metadata)
+│   ├── zen-tab-popup.sh              # popup launcher (kitty/tmux)
+│   ├── zen-search-handler.sh         # rofi-blocks handler (bangs + suggestions)
+│   ├── zen-workspaces.sh             # tab group manager
+│   ├── zen-workspaces.example.conf   # tab group definitions template
+│   ├── git-profiles.example.conf     # git profile definitions template
+│   ├── generate-previews.sh          # screenshot each style for selector
+│   └── apis/
+│       ├── google-suggest.sh         # google autocomplete API
+│       ├── ddg-suggest.sh            # duckduckgo autocomplete API
+│       ├── youtube-suggest.sh        # youtube suggestions API
+│       ├── wikipedia-suggest.sh      # wikipedia opensearch API
+│       └── suggest-aggregator.sh     # unified suggestions (API + bookmarks + history)
+└── tests/                            # bats test suite
+    ├── run_tests.sh
+    ├── test_helper/
+    └── *.bats
 ```
 
-Domains are matched as substrings against tab URLs. Edit the file to customize groups.
+## theme system
 
-## Troubleshooting
+themes are ported from [HyDE](https://github.com/HyDE-Project/HyDE), adapted for i3/X11. the launcher reads the current wallpaper from `~/.fehbg` and injects it at runtime. border radius is pulled from picom config.
 
-### Launcher shows wrong style
+theme layering:
 
-- Check `style.conf` contents: `cat ~/.config/rofi/style.conf`
-- Ensure the style file exists in `themes/`
+```
+theme.rasi              <- color variables (wallust-generated)
+├── style_{1..12}.rasi  <- 12 launcher styles
+├── launchpad.rasi      <- fullscreen app grid
+├── selector.rasi       <- style selector
+├── clipboard.rasi      <- dropdown utility menu
+├── simple.rasi         <- single-column menu
+├── searchbar.rasi      <- fullscreen search overlay
+└── wallpaper-slider.rasi
+```
 
-### No wallpaper in launcher sidebar
+`catppuccin-mocha.rasi` (in `shared/`) contains the full palette for reference.
 
-- Check `~/.fehbg` exists and contains a valid wallpaper path
-- Verify wallpaper file exists at the path in `~/.fehbg`
+## dependencies
 
-### Style selector shows no previews
+### required
 
-- Run `generate-previews.sh` to create preview assets
-- Check `themes/assets/` for `.png` files
+- **rofi** (1.7+) — menu framework
+- **picom** — compositor (transparency, corner radius)
+- **i3** — window manager
+- **feh** — wallpaper setter (writes `~/.fehbg`)
+- **JetBrainsMono Nerd Font** — icon font used throughout
+- **notify-send** — desktop notifications
 
-### Greenclip not working
+### per-feature
 
-- Check daemon: `pgrep greenclip`
-- Start manually: `greenclip daemon &`
+| Feature | Packages |
+|---|---|
+| Screenshot | `maim`, `xclip`, `xdotool` |
+| Clipboard | `greenclip` |
+| Emoji | `rofimoji` (via pipx) |
+| Calculator | `rofi-calc` plugin |
+| Media | `playerctl` |
+| Wallpaper | `feh`, `ImageMagick` |
+| Wallpaper (live preview) | `rofi-blocks` plugin |
+| Bluetooth | `bluetoothctl` |
+| Display | `xrandr` |
+| Systemd | `pkexec` |
+| Bookmarks | `sqlite3`, Zen Browser |
+| Web Search | `curl`, `jq`, `python3` |
+| Web Search v2 | `rofi-blocks` (optional) |
+| Zen Tab Switcher | `brotab`, `fzf` (0.60+), `kitty`, `xclip` |
+| Zen Tab Groups | `brotab` |
+| Projects | `code` (VS Code), `kitty` |
+| Obsidian | `code` (VS Code) |
+| Tmux | `tmux`, `kitty` |
 
-### Calculator not showing
+## configuration
 
-- Verify rofi-calc plugin: `rofi -dump-config | grep calc`
+**changing launcher style** — press `$mod+Shift+d` to open the style selector, or edit `style.conf` directly:
+```bash
+echo "rofiStyle=style_5" > ~/.config/rofi/style.conf
+```
 
-### Emoji picker not working
+**customizing colors** — edit `themes/theme.rasi` to change color variables
 
-- Verify: `which rofimoji`
-- Install: `pipx install rofimoji`
+**zen workspace groups** — copy `scripts/zen-workspaces.example.conf` to `scripts/zen-workspaces.conf`, edit domain patterns:
+```
+Work|github.com,linear.app,vercel.com
+Personal|youtube.com,reddit.com
+```
 
-### Tab switcher shows no tabs
+**git profiles** — copy `scripts/git-profiles.example.conf` to `scripts/git-profiles.conf`, add entries:
+```
+Work|Your Name|you@company.com
+Personal|username|you@personal.com
+```
 
-- Check brotab is running: `bt list`
-- Install/setup: `pip install brotab` then install the browser extension
-- Verify Zen Browser is running with the brotab extension enabled
+**obsidian vault path** — default `~/powerhouse/`, edit `VAULT_DIR` in the obsidian scripts
 
-### Tab switcher popup doesn't float
+**project directory** — default `~/work/`, edit `PROJECTS_DIR` in `scripts/rofi-projects.sh`
 
-- Verify i3 floating rule: `grep zen-tab-switcher ~/.config/i3/config`
-- Reload i3: `$mod+Shift+r`
+## troubleshooting
 
-### Search bar has no live suggestions
+- **launcher wrong style** — check `style.conf` contents, make sure the style file exists in `themes/`
+- **no wallpaper in sidebar** — check `~/.fehbg` exists and contains a valid path
+- **style selector no previews** — run `scripts/generate-previews.sh`
+- **greenclip not working** — check daemon is running: `pgrep greenclip`
+- **tab switcher no tabs** — check `bt list`, make sure brotab extension is installed in zen
+- **tab switcher doesn't float** — check i3 floating rule for zen-tab-switcher
+- **search bar no suggestions** — check rofi-blocks is installed, falls back to simple input without it
+- **wrong zen window class** — run `xprop WM_CLASS`, update `ZEN_WM_CLASS` in `scripts/zen-utils.sh`
 
-- Check if `rofi-blocks` is installed: `rofi -dump-config | grep blocks`
-- Without `rofi-blocks`, falls back to a simple text input (no autocomplete)
+## contributing
 
-### Wrong Zen Browser window class
+PRs welcome. keep it clean, keep it useful. if you add a new menu, include an i3 keybinding suggestion and pick a theme (`clipboard.rasi`, `simple.rasi`, or `searchbar.rasi`).
 
-- Run `xprop WM_CLASS` and click the Zen window
-- Update `ZEN_WM_CLASS` in `scripts/zen-utils.sh` if it differs from `zen-alpha`
+## acknowledgements
+
+- [HyDE](https://github.com/HyDE-Project/HyDE) — launcher styles and theme system
+- [Catppuccin](https://github.com/catppuccin/catppuccin) — color palette
+
+---
+
+<p align="center">
+  <a href="https://github.com/shaiknoorullah">@shaiknoorullah</a>
+  <br>
+  <sub>rofi does everything if you let it</sub>
+</p>
