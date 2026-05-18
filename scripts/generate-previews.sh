@@ -15,7 +15,7 @@ for i in $(seq 1 12); do
     echo "rofiStyle=style_$i" > "$ROFI_DIR/style.conf"
     "$ROFI_DIR/scripts/rofilaunch.sh" d &
     sleep 2
-    maim "$ASSET_DIR/style_$i.png"
+    grim "$ASSET_DIR/style_$i.png"
     pkill rofi
     sleep 0.5
 done
@@ -24,7 +24,7 @@ done
 echo "Capturing launchpad..."
 rofi -show drun -theme "$ROFI_DIR/themes/launchpad.rasi" &
 sleep 2
-maim "$ASSET_DIR/launchpad.png"
+grim "$ASSET_DIR/launchpad.png"
 pkill rofi
 
 # Restore original style

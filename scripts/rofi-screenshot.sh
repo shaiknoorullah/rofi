@@ -12,7 +12,7 @@
 #
 # Dependencies:
 #   - rofi        : menu launcher (dmenu mode)
-#   - maim        : screenshot tool (lightweight alternative to scrot)
+#   - grim        : screenshot tool (lightweight alternative to scrot)
 #   - xclip       : copies the image to the X clipboard
 #   - xdotool     : identifies the active window ID for window-mode capture
 #   - notify-send : desktop notification (typically provided by dunst)
@@ -32,7 +32,7 @@ SAVE_DIR="$HOME/Pictures/Screenshots"
 
 # Generate a unique filename using the current date and time. This is
 # computed once at script start so that the filename reflects when the
-# user initiated the action, not when maim finishes capturing.
+# user initiated the action, not when grim finishes capturing.
 FILENAME="screenshot-$(date +%Y%m%d-%H%M%S).png"
 
 # Ensure the save directory exists (safe to call repeatedly via -p)
@@ -51,7 +51,7 @@ chosen=$(echo -e "$options" | rofi -dmenu -theme "$THEME" -p "Screenshot" -mesg 
 
 # take_screenshot — Captures the screen and saves/copies the result.
 #
-# Handles three capture modes via maim, then copies the resulting image
+# Handles three capture modes via grim, then copies the resulting image
 # to the clipboard and sends a desktop notification.
 #
 # Parameters:
@@ -68,24 +68,24 @@ take_screenshot() {
         # Fullscreen: sleep briefly so rofi has time to close and its
         # window doesn't appear in the capture. 0.3s is enough for the
         # compositor to finish the close animation.
-        fullscreen) sleep 0.3; maim "$filepath" ;;
+        fullscreen) sleep 0.3; grim "$filepath" ;;
 
-        # Area: maim -s lets the user click-and-drag a rectangle.
+        # Area: grim -g "$(slurp)" lets the user click-and-drag a rectangle.
         # No sleep needed because rofi closes before the selection starts.
-        area)       maim -s "$filepath" ;;
+        area)       grim -g "$(slurp)" "$filepath" ;;
 
-        # Window: capture only the currently focused window by passing its
-        # X window ID to maim via xdotool. This avoids capturing panels,
-        # bars, or other overlapping windows.
-        window)     maim -i "$(xdotool getactivewindow)" "$filepath" ;;
+        # Window: capture only the currently focused window. On Wayland we
+        # ask Hyprland for the active window's geometry and pass it to grim
+        # via `-g X,Y WxH` to crop exactly to that region.
+        window)     grim -g "$(hyprctl activewindow -j | jq -r '"\(.at[0]),\(.at[1]) \(.size[0])x\(.size[1])"')" "$filepath" ;;
     esac
 
-    # Only proceed if maim successfully wrote the file (it won't exist if
+    # Only proceed if grim successfully wrote the file (it won't exist if
     # the user cancelled area selection, for example).
     if [[ -f "$filepath" ]]; then
         # Copy to clipboard so the screenshot can be pasted immediately
         # (e.g. Ctrl+V in Slack, Discord, etc.)
-        xclip -selection clipboard -t image/png < "$filepath"
+        wl-copy --type image/png < "$filepath"
 
         # Desktop notification with the screenshot as its icon/thumbnail,
         # auto-dismissed after 3 seconds.

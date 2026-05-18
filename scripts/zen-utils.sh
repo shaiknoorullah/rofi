@@ -120,9 +120,9 @@ zen_get_favicon() {
 }
 
 # zen_focus_browser()
-#   Focus the Zen Browser window using i3's IPC, matching by X11 class.
+#   Focus the Zen Browser window using Hyprland's IPC, matching by class.
 zen_focus_browser() {
-    i3-msg "[class=\"$ZEN_WM_CLASS\"]" focus &>/dev/null
+    hyprctl dispatch focuswindow "class:$ZEN_WM_CLASS" &>/dev/null
 }
 
 # zen_notify()

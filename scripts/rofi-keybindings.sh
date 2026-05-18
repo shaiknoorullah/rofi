@@ -31,7 +31,7 @@
 THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
 # Path to the i3 window manager config file
-I3_CONFIG="$HOME/.config/i3/config"
+I3_CONFIG="$HOME/.config/hypr/hyprland.conf"
 
 # Guard: exit early if the i3 config doesn't exist (e.g. running on a
 # different WM or a fresh install).

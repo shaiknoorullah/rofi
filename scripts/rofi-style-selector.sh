@@ -16,8 +16,8 @@ CONF_FILE="$ROFI_DIR/style.conf"
 # Font override
 font_override='* {font: "JetBrainsMono Nerd Font 10";}'
 
-# Get monitor width for column calculation
-mon_width=$(xrandr --query | grep ' connected primary' | grep -oP '\d+(?=x)' | head -1)
+# Get monitor width for column calculation (Wayland / Hyprland)
+mon_width=$(hyprctl monitors -j 2>/dev/null | jq -r '.[0].width' 2>/dev/null)
 mon_width=${mon_width:-1920}
 col_count=$(( mon_width / 400 ))
 [[ $col_count -gt 5 ]] && col_count=5

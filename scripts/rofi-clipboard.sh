@@ -1,48 +1,37 @@
 #!/usr/bin/env bash
 #
-# rofi-clipboard.sh — Clipboard history manager via greenclip
+# rofi-clipboard.sh — Clipboard history via cliphist (Wayland)
 #
 # Description:
-#   A thin wrapper that integrates greenclip (a clipboard history daemon)
-#   with rofi's custom modi feature. It ensures the greenclip daemon is
-#   running, then launches rofi with greenclip as a custom clipboard modi.
-#   Selecting an entry from the history pastes it back to the clipboard.
+#   Uses cliphist + wl-clipboard to show clipboard history in rofi.
+#   On selection, the chosen entry is decoded and copied back to the
+#   Wayland clipboard.
 #
-# Keybinding: $mod+c (defined in i3 config)
+# Keybinding: $mod+c
 #
 # Dependencies:
-#   - rofi      : menu launcher (custom modi mode)
-#   - greenclip : clipboard history daemon for X11. Config lives at
-#                 ~/.config/greenclip.toml (history size, excluded apps, etc.)
+#   - rofi
+#   - cliphist
+#   - wl-clipboard (provides wl-copy / wl-paste)
 #
-# Usage:
-#   ~/.config/rofi/scripts/rofi-clipboard.sh
+# Background daemon:
+#   The cliphist watcher must be running to record clipboard history.
+#   It is started from ~/.config/hypr/hyprland.conf:
+#     exec-once = wl-paste --type text  --watch cliphist store
+#     exec-once = wl-paste --type image --watch cliphist store
 #
-# Notes:
-#   greenclip must be running as a background daemon to record clipboard
-#   history. This script auto-starts it if it's not already running, but
-#   for best results greenclip should be started in the i3 config with:
-#     exec --no-startup-id greenclip daemon
-#   The "clipboard:greenclip print" modi syntax tells rofi to use
-#   "greenclip print" as the command backing the "clipboard" tab.
+set -eu
 
-# Path to the dedicated rofi theme for the clipboard manager
 THEME="$HOME/.config/rofi/themes/clipboard.rasi"
 
-# Ensure the greenclip daemon is running before opening the menu.
-# pgrep -x matches the exact process name to avoid false positives.
-# If the daemon isn't running, we start it in the background and sleep
-# briefly to give it time to initialize and load its history file before
-# rofi tries to query it. Without this delay, the first launch after boot
-# could show an empty history.
-if ! pgrep -x greenclip > /dev/null; then
-    greenclip daemon &
-    sleep 0.5
+# Make sure the watcher is alive (in case Hyprland exec-once was skipped)
+if ! pgrep -fa "wl-paste --type text --watch cliphist store" >/dev/null; then
+    wl-paste --type text  --watch cliphist store &
+    wl-paste --type image --watch cliphist store &
+    sleep 0.3
 fi
 
-# Launch rofi with greenclip as a custom modi.
-# -modi "clipboard:greenclip print" registers a custom tab called "clipboard"
-# that pipes its entries through "greenclip print". When the user selects
-# an entry, greenclip copies it back to the active clipboard selection.
-# -show clipboard tells rofi to open directly on the clipboard tab.
-rofi -modi "clipboard:greenclip print" -show clipboard -theme "$THEME"
+# Show history in rofi and decode the selection back to the clipboard.
+selected=$(cliphist list | rofi -dmenu -theme "$THEME" -p '󰅍 clipboard') || exit 0
+[ -z "$selected" ] && exit 0
+printf '%s\n' "$selected" | cliphist decode | wl-copy
