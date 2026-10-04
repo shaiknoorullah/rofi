@@ -24,10 +24,9 @@ THUMB_DIR="$CACHE_DIR/thumbs/$CATEGORY"
 mkdir -p "$THUMB_DIR"
 
 # Save current wallpaper for revert on Escape
-ORIGINAL_WALL=""
-if [[ -f "$HOME/.fehbg" ]]; then
-    ORIGINAL_WALL=$(grep -oP "(?<='|\")\S+\.(jpg|jpeg|png|webp|bmp)(?='|\")" "$HOME/.fehbg" | head -1)
-fi
+# shellcheck source=wallpaper-lib.sh
+source "$ROFI_DIR/scripts/wallpaper-lib.sh"
+ORIGINAL_WALL=$(wall_current)
 
 # Generate thumbnails for all wallpapers in category
 for img in "$CAT_DIR"/*.{jpg,jpeg,png,webp,bmp,JPG,JPEG,PNG,WEBP,BMP}; do
@@ -62,11 +61,14 @@ chosen=$(echo -en "$entries" | sort -V | rofi -dmenu \
 
 # Handle result
 if [[ -n "$chosen" ]]; then
-    feh --bg-fill "$CAT_DIR/$chosen"
-    notify-send "Wallpaper Set" "$CATEGORY/$chosen" -t 3000
+    if wall_set "$CAT_DIR/$chosen"; then
+        notify-send "Wallpaper Set" "$CATEGORY/$chosen" -t 3000
+    else
+        notify-send "Wallpaper NOT set" "$CATEGORY/$chosen (awww/feh failed)" -u critical
+    fi
 else
     # Revert on Escape
-    if [[ -n "$ORIGINAL_WALL" && -f "$ORIGINAL_WALL" ]]; then
-        feh --bg-fill "$ORIGINAL_WALL"
+    if [[ -n "$ORIGINAL_WALL" && -f "$ORIGINAL_WALL" && "$(wall_current)" != "$ORIGINAL_WALL" ]]; then
+        wall_set "$ORIGINAL_WALL"
     fi
 fi

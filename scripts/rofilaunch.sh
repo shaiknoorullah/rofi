@@ -35,11 +35,10 @@ case "$1" in
     *)            r_mode="drun" ;;
 esac
 
-# Extract current wallpaper path from feh's saved state
-wall_path=""
-if [[ -f "$HOME/.fehbg" ]]; then
-    wall_path=$(grep -oP "(?<='|\")\S+\.(jpg|jpeg|png|webp|bmp)(?='|\")" "$HOME/.fehbg" | head -1)
-fi
+# Current wallpaper (awww on Wayland, ~/.fehbg on X11) via the shared helper
+# shellcheck source=wallpaper-lib.sh
+source "$ROFI_DIR/scripts/wallpaper-lib.sh"
+wall_path=$(wall_current)
 
 # Generate HyDE-compatible wallpaper cache variants
 # Styles reference: wall.blur, wall.thmb, wall.sqre, wall.quad
